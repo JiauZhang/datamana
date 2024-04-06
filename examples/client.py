@@ -1,4 +1,4 @@
-from datashare.torch import Client
+from datamana.torch import Client
 
 client = Client()
 
