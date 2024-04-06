@@ -1,3 +1,8 @@
+import torch
 from datashare.torch import Server
 
-server = Server([1, 2, 3, 4, 5, 6, 7, 8, 9], 16)
+fake_tensors = [
+    torch.randn(32, 3, 512, 512) for _ in range(4)
+]
+
+server = Server(fake_tensors)
