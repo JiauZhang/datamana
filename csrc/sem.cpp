@@ -1,3 +1,4 @@
+#include <semaphore.h>
 #include <nanobind/nanobind.h>
 
 int add(int a, int b) {
