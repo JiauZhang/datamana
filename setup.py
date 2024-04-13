@@ -118,6 +118,6 @@ class CMakeBuild(build_ext):
         )
 
 setup(
-    ext_modules=[CMakeExtension("datamana.sem")],
+    ext_modules=[CMakeExtension("datamana.semaphore")],
     cmdclass={"build_ext": CMakeBuild},
 )

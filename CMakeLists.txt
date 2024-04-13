@@ -10,9 +10,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 execute_process(
-  COMMAND "${PYTHON_EXECUTABLE}" -m nanobind --cmake_dir
+  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
   OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE NB_DIR)
 list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 find_package(nanobind CONFIG REQUIRED)
 
-nanobind_add_module(sem STABLE_ABI csrc/sem.cpp)
+nanobind_add_module(semaphore STABLE_ABI csrc/semaphore.cpp)
