@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15...3.27)
+cmake_minimum_required(VERSION 3.15)
 
 project(datamana)
 
@@ -10,9 +10,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 execute_process(
-  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+  COMMAND "${PYTHON_EXECUTABLE}" -m nanobind --cmake_dir
   OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE NB_DIR)
 list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 find_package(nanobind CONFIG REQUIRED)
 
-nanobind_add_module(sem csrc/sem.cpp)
+nanobind_add_module(sem STABLE_ABI csrc/sem.cpp)
