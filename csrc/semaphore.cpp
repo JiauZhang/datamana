@@ -37,7 +37,7 @@ struct Semaphore {
     }
 };
 
-NB_MODULE(semaphore, m) {
+NB_MODULE(core, m) {
     nb::class_<Semaphore>(m, "Semaphore")
         .def(nb::init<>())
         .def("open", &Semaphore::py_sem_open)

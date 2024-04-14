@@ -15,4 +15,4 @@ execute_process(
 list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 find_package(nanobind CONFIG REQUIRED)
 
-nanobind_add_module(semaphore STABLE_ABI csrc/semaphore.cpp)
+nanobind_add_module(core STABLE_ABI csrc/semaphore.cpp csrc/mqueue.cpp)

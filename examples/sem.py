@@ -1,5 +1,5 @@
 import time, os
-from datamana.semaphore import Semaphore
+from datamana.core import Semaphore
 
 sem = Semaphore()
 if sem.open('datamana-01', sem.O_CREAT, 666, 1) == -1:

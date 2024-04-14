@@ -15,9 +15,9 @@ PLAT_TO_CMAKE = {
 # The name must be the _single_ output extension from the CMake build.
 # If you need multiple extensions, see scikit-build.
 class CMakeExtension(Extension):
-    def __init__(self, name: str, sourcedir: str = "") -> None:
-        super().__init__(name, sources=[])
+    def __init__(self, name: str, sourcedir: str, sources) -> None:
         self.sourcedir = os.fspath(Path(sourcedir).resolve())
+        super().__init__(name, sources=sources)
 
 
 class CMakeBuild(build_ext):
@@ -118,6 +118,9 @@ class CMakeBuild(build_ext):
         )
 
 setup(
-    ext_modules=[CMakeExtension("datamana.semaphore")],
+    ext_modules=[CMakeExtension("datamana.core", sourcedir=".", sources=[
+        'CMakeLists.txt',
+        'csrc/semaphore.cpp', 'csrc/mqueue.cpp',
+    ])],
     cmdclass={"build_ext": CMakeBuild},
 )
