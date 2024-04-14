@@ -2,7 +2,6 @@
 #include <sys/stat.h>        /* For mode constants */
 #include <semaphore.h>
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/string.h>
 
 namespace nb = nanobind;
 
@@ -36,16 +35,3 @@ struct Semaphore {
         return sem_wait(sem);
     }
 };
-
-NB_MODULE(core, m) {
-    nb::class_<Semaphore>(m, "Semaphore")
-        .def(nb::init<>())
-        .def("open", &Semaphore::py_sem_open)
-        .def("close", &Semaphore::py_sem_close)
-        .def("unlink", &Semaphore::py_sem_unlink)
-        .def("wait", &Semaphore::py_sem_wait)
-        .def("post", &Semaphore::py_sem_post)
-        .def_prop_ro("O_CREAT", [](Semaphore &sem) { return sem.o_creat; })
-        .def_prop_ro("O_EXCL", [](Semaphore &sem) { return sem.o_excl; })
-        .def_prop_ro("O_TRUNC", [](Semaphore &sem) { return sem.o_trunc; });
-}

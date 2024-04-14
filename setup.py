@@ -120,7 +120,7 @@ class CMakeBuild(build_ext):
 setup(
     ext_modules=[CMakeExtension("datamana.core", sourcedir=".", sources=[
         'CMakeLists.txt',
-        'csrc/semaphore.cpp', 'csrc/mqueue.cpp',
+        'csrc/semaphore.hpp', 'csrc/mqueue.hpp', 'csrc/python.cpp',
     ])],
     cmdclass={"build_ext": CMakeBuild},
 )
