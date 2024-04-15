@@ -17,6 +17,7 @@ find_package(nanobind CONFIG REQUIRED)
 
 nanobind_add_module(
   core STABLE_ABI
-  csrc/semaphore.hpp csrc/mqueue.hpp
+  csrc/semaphore.hpp csrc/mqueue.hpp csrc/fcntl.hpp
   csrc/python.cpp
 )
+target_link_libraries(core PRIVATE rt)

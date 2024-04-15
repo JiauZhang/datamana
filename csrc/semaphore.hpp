@@ -7,9 +7,6 @@ namespace nb = nanobind;
 
 struct Semaphore {
     sem_t *sem;
-    const int o_creat = O_CREAT;
-    const int o_excl = O_EXCL;
-    const int o_trunc = O_TRUNC;
 
     Semaphore() : sem((sem_t *)0) {}
 

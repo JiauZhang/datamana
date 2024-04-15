@@ -1,8 +1,8 @@
 import time, os
-from datamana.core import Semaphore
+from datamana.core import Semaphore, fcntl
 
 sem = Semaphore()
-if sem.open('datamana-01', sem.O_CREAT, 666, 1) == -1:
+if sem.open('datamana-01', fcntl.O_CREAT, 666, 1) == -1:
     print('sem open failed!')
     exit(-1)
 count = 0

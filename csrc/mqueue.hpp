@@ -8,12 +8,6 @@ namespace nb = nanobind;
 
 struct MQueue {
     mqd_t mqd;
-    const int o_rdonly = O_RDONLY;
-    const int o_wronly = O_WRONLY;
-    const int o_rdwr = O_RDWR;
-    const int o_creat = O_CREAT;
-    const int o_excl = O_EXCL;
-    const int o_nonblock = O_NONBLOCK;
 
     MQueue() : mqd((mqd_t)-1) {}
 
