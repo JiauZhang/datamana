@@ -14,7 +14,7 @@ struct Semaphore {
         sem = sem_open(name, oflag, (mode_t)mode, value);
         if (sem == (sem_t *)SEM_FAILED) {
             sem = 0;
-            return -1;
+            return errno;
         } else {
             return 0;
         }

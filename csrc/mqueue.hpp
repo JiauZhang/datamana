@@ -11,10 +11,10 @@ struct MQueue {
 
     MQueue() : mqd((mqd_t)-1) {}
 
-    int py_mq_open(const char *name, int oflag, unsigned int mode, struct mq_attr *attr) {
-        mqd = mq_open(name, oflag, (mode_t)mode, attr);
+    int py_mq_open(const char *name, int oflag, unsigned int mode) {
+        mqd = mq_open(name, oflag, (mode_t)mode, nullptr);
         if (mqd == (mqd_t)-1) {
-            return -1;
+            return errno;
         } else {
             return 0;
         }

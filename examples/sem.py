@@ -1,9 +1,10 @@
 import time, os
-from datamana.core import Semaphore, fcntl
+from datamana.core import Semaphore
 
 sem = Semaphore()
-if sem.open('datamana-01', fcntl.O_CREAT, 666, 1) == -1:
-    print('sem open failed!')
+errno = sem.open('datamana-01', os.O_CREAT, 666, 1)
+if errno != 0:
+    print(f'Semaphore open failed! <{os.strerror(errno)}>')
     exit(-1)
 count = 0
 pid = os.getpid()
