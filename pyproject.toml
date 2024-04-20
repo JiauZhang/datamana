@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-    "build >= 1.2",
-    "setuptools >= 67",
+    "build",
+    "setuptools >= 42",
     "wheel",
     "ninja",
     "cmake >= 3.15",
@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datamana"
-version = "0.0.6"
+version = "0.0.7"
 description = "Dataset Manager"
 readme = "README.md"
 authors = [
