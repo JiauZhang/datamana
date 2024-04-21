@@ -32,3 +32,13 @@ struct Semaphore {
         return sem_wait(sem);
     }
 };
+
+void DEFINE_SEMAPHORE_MODULE(nb::module_ & (m)) {
+    nb::class_<Semaphore>(m, "Semaphore")
+        .def(nb::init<>())
+        .def("open", &Semaphore::py_sem_open)
+        .def("close", &Semaphore::py_sem_close)
+        .def("unlink", &Semaphore::py_sem_unlink)
+        .def("wait", &Semaphore::py_sem_wait)
+        .def("post", &Semaphore::py_sem_post);
+}
