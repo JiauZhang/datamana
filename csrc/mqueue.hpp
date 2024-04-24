@@ -13,27 +13,39 @@ struct MQueue {
     MQueue() : mqd((mqd_t)-1) {}
 
     int py_mq_open(const char *name, int oflag, unsigned int mode) {
+        mode_t omask = umask(0);
         mqd = mq_open(name, oflag, (mode_t)mode, &attr);
-        if (mqd == (mqd_t)-1) {
-            return errno;
-        } else {
-            return 0;
-        }
+        umask(omask);
+        int ret = 0;
+        if (mqd == (mqd_t)-1)
+            ret = errno;
+        return ret;
     }
     int py_mq_unlink(const char *name) {
-        return mq_unlink(name);
+        int ret = mq_unlink(name);
+        if (ret == -1)
+            ret = errno;
+        return ret;
     }
     int py_mq_close() {
-        return mq_close(mqd);
+        int ret = mq_close(mqd);
+        if (ret == -1)
+            ret = errno;
+        return ret;
     }
     int py_mq_send(std::string &msg, unsigned int msg_prio) {
-        return mq_send(mqd, (const char *)msg.c_str(), msg.size(), msg_prio);
+        int ret = mq_send(mqd, (const char *)msg.c_str(), msg.size(), msg_prio);
+        if (ret == -1)
+            ret = errno;
+        return ret;
     }
-    std::string py_mq_receive() {
+    int py_mq_receive(std::string &msg) {
         unsigned int msg_prio;
-        std::string msg(32, '\0');
-        mq_receive(mqd, (char *)msg.c_str(), msg.size(), &msg_prio);
-        return msg;
+        msg.resize(attr.mq_msgsize);
+        int ret = mq_receive(mqd, (char *)msg.c_str(), msg.size(), &msg_prio);
+        if (ret == -1)
+            ret = errno;
+        return ret;
     }
 };
 

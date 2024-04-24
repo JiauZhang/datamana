@@ -1,4 +1,4 @@
-import time, os
+import os
 from datamana.core import MQueue
 
 mq = MQueue()
@@ -13,8 +13,7 @@ count = 0
 pid = os.getpid()
 
 while count < 20:
-    msg = 'hello'
-    print(f'<{pid}>send msg: {msg}')
-    mq.send(msg, 0)
+    msg = ''
+    mq.receive(msg)
+    print(f'<{pid}>receive msg: {msg}')
     count += 1
-    time.sleep(1)
