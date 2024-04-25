@@ -3,6 +3,7 @@
 #include <mqueue.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
 
 namespace nb = nanobind;
 
@@ -39,13 +40,18 @@ struct MQueue {
             ret = errno;
         return ret;
     }
-    int py_mq_receive(std::string &msg) {
+    std::tuple<int, std::string, unsigned int> py_mq_receive() {
         unsigned int msg_prio;
-        msg.resize(attr.mq_msgsize);
+        std::string msg(attr.mq_msgsize, '\0');
         int ret = mq_receive(mqd, (char *)msg.c_str(), msg.size(), &msg_prio);
-        if (ret == -1)
+        if (ret == -1) {
             ret = errno;
-        return ret;
+            msg.resize(0);
+        } else {
+            msg.resize(ret);
+            ret = 0;
+        }
+        return std::tuple(ret, msg, msg_prio);
     }
 };
 
