@@ -13,6 +13,6 @@ count = 0
 pid = os.getpid()
 
 while count < 20:
-    ret, msg, msg_prio = mq.receive(msg)
+    ret, msg, msg_prio = mq.receive()
     print(f'<{pid}>receive msg: {ret, msg, msg_prio}')
     count += 1
