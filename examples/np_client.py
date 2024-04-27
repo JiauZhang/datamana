@@ -1,4 +1,4 @@
-from datamana.torch import Client
+from datamana.numpy import Client
 
 client = Client()
 
