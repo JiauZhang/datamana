@@ -118,6 +118,6 @@ class CMakeBuild(build_ext):
         )
 
 setup(
-    ext_modules=[CMakeExtension("datamana.core", sourcedir=".")],
+    ext_modules=[CMakeExtension("datamana._C", sourcedir=".")],
     cmdclass={"build_ext": CMakeBuild},
 )

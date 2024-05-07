@@ -16,8 +16,8 @@ list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 find_package(nanobind CONFIG REQUIRED)
 
 nanobind_add_module(
-  core STABLE_ABI
-  csrc/semaphore.hpp csrc/mqueue.hpp
+  _C STABLE_ABI
+  csrc/semaphore.hpp csrc/mqueue.hpp csrc/shared_memory.hpp
   csrc/python.cpp
 )
-target_link_libraries(core PRIVATE rt)
+target_link_libraries(_C PRIVATE rt)

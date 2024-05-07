@@ -1,5 +1,5 @@
 import time, os
-from datamana.core import Semaphore
+from datamana._C import Semaphore
 
 sem = Semaphore()
 errno = sem.open('datamana-01', os.O_CREAT, 666, 1)

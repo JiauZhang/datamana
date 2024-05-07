@@ -1,6 +1,6 @@
 import os, time, pickle
 from multiprocessing import shared_memory
-from datamana.core import Semaphore, MQueue
+from datamana._C import Semaphore, MQueue
 from typing import Iterable
 
 class Base():

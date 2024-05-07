@@ -1,5 +1,5 @@
 import os
-from datamana.core import MQueue
+from datamana._C import MQueue
 
 mq = MQueue()
 mq.flags = 0
