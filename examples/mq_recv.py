@@ -1,14 +1,7 @@
 import os
-from datamana._C import MQueue
+from datamana.ipc import MQueue
 
-mq = MQueue()
-mq.flags = 0
-mq.msgsize = 8
-mq.maxmsg = 4
-errno = mq.open('/datamana', os.O_CREAT | os.O_RDWR, 600)
-if errno != 0:
-    print(f'MQueue open failed! <{os.strerror(errno)}>')
-    exit(-1)
+mq = MQueue('datamana', msgsize=8, maxmsg=4)
 count = 0
 pid = os.getpid()
 

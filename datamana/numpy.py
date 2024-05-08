@@ -16,7 +16,7 @@ class Server(Base):
         except StopIteration:
             self.iterloader = iter(self.dataloader)
             data = next(self.iterloader)
-        Server.write_shared_data(self.data_share_name, data, data.nbytes)
+        self.write_shared_data(self.data_share_name, data, data.nbytes)
 
         meta_data = {
             'shape': data.shape,
@@ -24,7 +24,7 @@ class Server(Base):
             'pids': set(),
         }
         meta_data_pkl = pickle.dumps(meta_data)
-        Server.write_shared_data(self.data_meta_name, meta_data_pkl, len(meta_data_pkl))
+        self.write_shared_data(self.data_meta_name, meta_data_pkl, len(meta_data_pkl))
 
     def serve(self):
         self.next()
@@ -63,7 +63,7 @@ class Client(Base):
 
                 meta_data['pids'].add(self.pid)
                 meta_data_pkl = pickle.dumps(meta_data)
-                Client.write_shared_data(self.data_meta_name, meta_data_pkl, len(meta_data_pkl))
+                self.write_shared_data(self.data_meta_name, meta_data_pkl, len(meta_data_pkl))
                 self.sem.post()
                 return data
             else:
