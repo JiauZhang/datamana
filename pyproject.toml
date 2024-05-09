@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "datamana"
-version = "0.0.14"
+version = "0.1.0"
 description = "Dataset Manager"
 readme = "README.md"
 authors = [

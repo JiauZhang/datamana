@@ -1,5 +1,4 @@
 import os, time, pickle
-from multiprocessing import shared_memory
 from typing import Iterable
 from datamana.base import Base
 import numpy as np
@@ -9,6 +8,7 @@ class Server(Base):
         super().__init__(name)
         self.dataloader = dataloader
         self.iterloader = iter(self.dataloader)
+        self.oflags = os.O_CREAT | os.O_RDWR
 
     def next(self):
         try:
@@ -16,7 +16,8 @@ class Server(Base):
         except StopIteration:
             self.iterloader = iter(self.dataloader)
             data = next(self.iterloader)
-        self.write_shared_data(self.data_share_name, data, data.nbytes)
+        shm = self.get_shm(self.data_share_name, data.nbytes, oflags=self.oflags)
+        self.write_numpy(shm, data)
 
         meta_data = {
             'shape': data.shape,
@@ -24,7 +25,9 @@ class Server(Base):
             'pids': set(),
         }
         meta_data_pkl = pickle.dumps(meta_data)
-        self.write_shared_data(self.data_meta_name, meta_data_pkl, len(meta_data_pkl))
+        pkl_size = len(meta_data_pkl)
+        shm = self.get_shm(self.data_meta_name, pkl_size, oflags=self.oflags)
+        self.write_byte(shm, meta_data_pkl, pkl_size)
 
     def serve(self):
         self.next()
@@ -44,26 +47,27 @@ class Client(Base):
     def __init__(self, name):
         super().__init__(name)
         self.pid = os.getpid()
+        self.oflags = os.O_RDWR
 
     def next(self):
         while True:
             self.sem.wait()
 
-            shm_meta_data = shared_memory.SharedMemory(self.data_meta_name)
-            meta_data = pickle.loads(shm_meta_data.buf)
-            shm_meta_data.close()
+            shm_meta = self.get_shm(self.data_meta_name, 0, oflag=self.oflags)
+            meta_data = pickle.loads(shm_meta.buf)
 
             if self.pid not in meta_data['pids']:
                 shape = meta_data['shape']
                 dtype = np.dtype(meta_data['dtype'])
 
-                shm_data = shared_memory.SharedMemory(self.data_share_name)
+                shm_data = self.get_shm(self.data_share_name, 0, oflag=self.oflags)
                 data = np.ndarray(shape, dtype=dtype, buffer=shm_data.buf).copy()
-                shm_data.close()
 
                 meta_data['pids'].add(self.pid)
                 meta_data_pkl = pickle.dumps(meta_data)
-                self.write_shared_data(self.data_meta_name, meta_data_pkl, len(meta_data_pkl))
+                pkl_size = len(meta_data_pkl)
+                shm_meta = self.get_shm(self.data_meta_name, pkl_size, oflags=self.oflags)
+                self.write_byte(shm_meta, meta_data_pkl, pkl_size)
                 self.sem.post()
                 return data
             else:

@@ -1,4 +1,5 @@
 from datamana.ipc import Semaphore, MQueue, SharedMemory
+import numpy as np
 
 class Base():
     def __init__(self, name):
@@ -13,15 +14,22 @@ class Base():
         self.mq_rx = MQueue(self.data_mq_rx_name)
         self.name2shm = {}
 
-    def write_shared_data(self, shm_name, data, size):
+    def get_shm(self, shm_name, size, **kwargs):
         if shm_name in self.name2shm:
             shm = self.name2shm[shm_name]
+            if size > 0: shm.resize(size)
         else:
-            shm = SharedMemory(name=shm_name, size=size)
+            shm = SharedMemory(name=shm_name, size=size, **kwargs)
             self.name2shm[shm_name] = shm
-        shm.resize(size)
+        return shm
 
+    def write_byte(self, shm, data, size):
+        shm.resize(size)
         shm.buf[:size] = data[:]
+
+    def write_numpy(self, shm, data):
+        np_shm = np.ndarray(data.shape, dtype=data.dtype, buffer=shm.buf)
+        np_shm[:] = data[:]
 
     def server_send(self, msg, msg_prio=0):
         return self.mq_tx.send(msg, msg_prio)
