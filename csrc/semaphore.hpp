@@ -31,6 +31,9 @@ struct Semaphore {
     int py_sem_wait() {
         return sem_wait(sem);
     }
+    int py_sem_trywait() {
+        return sem_trywait(sem);
+    }
 };
 
 void DEFINE_SEMAPHORE_MODULE(nb::module_ & (m)) {
@@ -40,5 +43,6 @@ void DEFINE_SEMAPHORE_MODULE(nb::module_ & (m)) {
         .def("close", &Semaphore::py_sem_close)
         .def("unlink", &Semaphore::py_sem_unlink)
         .def("wait", &Semaphore::py_sem_wait)
+        .def("trywait", &Semaphore::py_sem_trywait)
         .def("post", &Semaphore::py_sem_post);
 }
