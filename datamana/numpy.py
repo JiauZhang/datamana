@@ -40,13 +40,13 @@ class Server(Base):
         while True:
             # wait client signal
             ret = self.event.wait()
-            loop = ret
-            # clean all signal
-            while loop == 0:
-                loop = self.event.trywait()
 
             if ret == 0:
                 self.sem.wait()
+                loop = ret
+                # clean all signal
+                while loop == 0:
+                    loop = self.event.trywait()
                 self.next()
                 self.sem.post()
             else:
@@ -78,5 +78,5 @@ class Client(Base):
                 self.sem.post()
                 return data
             else:
-                self.sem.post()
                 self.event.post()
+                self.sem.post()
