@@ -1,33 +1,17 @@
-import os, pickle
-from multiprocessing import shared_memory, managers
+import os, time, pickle
+from typing import Iterable
+from datamana.base import Base
+import numpy as np
+import torch
 
-class Server():
-    def __init__(self, dataloader, name='server_share_data', address=('127.0.0.1', 5566), authkey=b'server_torch_manager'):
-        SyncManager = managers.SyncManager
-        SyncManager.register('next', self.next)
-        self.manager = SyncManager(address=address, authkey=authkey)
-        self.share_name = name
-        self.data_name = 'server_torch_data'
-        self.pid = os.getpid()
-        self.address = address
-        self.authkey = authkey
-
-        shared_data = {
-            'pid': self.pid,
-            'address': self.address,
-            'authkey': self.authkey,
-        }
-        shared_data_pkl = pickle.dumps(shared_data)
-
-        self.shm_shared_data = shared_memory.SharedMemory(self.share_name, create=True, size=len(shared_data_pkl))
-        self.shm_shared_data.buf[:] = shared_data_pkl[:]
-
+class Server(Base):
+    def __init__(self, name, dataloader: Iterable):
+        super().__init__(name)
         self.dataloader = dataloader
-        self.size = 4096
-        self.shm_data = shared_memory.SharedMemory(name=self.data_name, create=True, size=self.size)
         self.iterloader = iter(self.dataloader)
-
-        self.manager.get_server().serve_forever()
+        self.oflags = os.O_CREAT | os.O_RDWR
+        self.data_id = 0
+        self.max_data_id = 2**31 - 1
 
     def next(self):
         try:
@@ -35,37 +19,68 @@ class Server():
         except StopIteration:
             self.iterloader = iter(self.dataloader)
             data = next(self.iterloader)
-        data_pkl = pickle.dumps(data)
-        data_len = len(data_pkl)
+        np_data = data.detach().cpu().numpy()
+        shm = self.get_shm(self.data_share_name, np_data.nbytes, oflag=self.oflags)
+        self.write_numpy(shm, np_data)
 
-        if data_len > self.size:
-            self.shm_data.close()
-            self.shm_data.unlink()
-            self.shm_data = shared_memory.SharedMemory(name=self.data_name, create=True, size=data_len)
-            self.size = data_len
+        meta_data = {
+            'shape': data.shape,
+            'dtype': data.dtype.name,
+            'id': self.data_id,
+        }
+        meta_data_pkl = pickle.dumps(meta_data)
+        pkl_size = len(meta_data_pkl)
+        shm = self.get_shm(self.data_meta_name, pkl_size, oflag=self.oflags)
+        self.write_byte(shm, meta_data_pkl, pkl_size)
+        self.data_id += 1
+        if self.data_id >= self.max_data_id:
+            self.data_id = 0
 
-        self.shm_data.buf[:data_len] = data_pkl
+    def serve(self):
+        self.next()
 
-class Client():
-    def __init__(self):
-        self.share_name = 'server_share_data'
-        self.data_name = 'server_torch_data'
+        while True:
+            # wait client signal
+            ret = self.event.wait()
 
-        self.shm_shared_data = shared_memory.SharedMemory(self.share_name)
+            if ret == 0:
+                self.sem.wait()
+                loop = ret
+                # clean all signal
+                while loop == 0:
+                    loop = self.event.trywait()
+                self.next()
+                self.sem.post()
+            else:
+                print(os.strerror(ret))
+                time.sleep(1)
 
-        self.shared_data = pickle.loads(self.shm_shared_data.buf)
-        address = self.shared_data['address']
-        authkey = self.shared_data['authkey']
-
-        SyncManager = managers.SyncManager
-        SyncManager.register('next')
-
-        self.manager = SyncManager(address=address, authkey=authkey)
-        self.manager.connect()
+class Client(Base):
+    def __init__(self, name, device=None):
+        super().__init__(name)
+        self.pid = os.getpid()
+        self.oflags = os.O_RDWR
+        self.data_id = -1
+        self.device = device
 
     def next(self):
-        self.manager.next()
-        self.shm_data = shared_memory.SharedMemory(self.data_name)
-        data = pickle.loads(self.shm_data.buf)
-        self.shm_data.close()
-        return data
+        while True:
+            self.sem.wait()
+
+            shm_meta = self.get_shm(self.data_meta_name, 0, oflag=self.oflags)
+            meta_data = pickle.loads(shm_meta.buf)
+
+            if self.data_id != meta_data['id']:
+                self.data_id = meta_data['id']
+                shape = meta_data['shape']
+                dtype = np.dtype(meta_data['dtype'])
+
+                shm_data = self.get_shm(self.data_share_name, 0, oflag=self.oflags)
+                np_data = np.ndarray(shape, dtype=dtype, buffer=shm_data.buf)
+                data = torch.tensor(np_data, device=self.device)
+
+                self.sem.post()
+                return data
+            else:
+                self.event.post()
+                self.sem.post()
