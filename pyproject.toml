@@ -38,3 +38,6 @@ Homepage = "https://github.com/jiauzhang/datamana"
 
 [tool.setuptools]
 packages = ["datamana"]
+
+[project.scripts]
+datamana = "datamana.__main__:main"
