@@ -3,14 +3,24 @@ import numpy as np
 
 class Base():
     def __init__(self, name):
-        self.data_name = f'datamana{name}'
-        self.data_meta_name = f'{self.data_name}meta'
-        self.data_share_name = f'{self.data_name}share'
-        self.data_sem_name = f'{self.data_name}sem'
-        self.data_event_name =f'{self.data_name}event'
-        self.sem = Semaphore(self.data_sem_name)
-        self.event = Semaphore(self.data_event_name)
+        self.data_name = f'datamana.{name}'
+        self.data_meta_name = f'{self.data_name}.meta'
+        self.data_share_name = f'{self.data_name}.share'
+        self.data_sem_name = f'{self.data_name}.sem'
+        self.data_event_name =f'{self.data_name}.event'
+        self.sem = Semaphore(self.data_sem_name, value=0)
+        self.event = Semaphore(self.data_event_name, value=0)
         self.name2shm = {}
+
+    def sem_init(self, sem: Semaphore, value=0):
+        ret = sem.trywait()
+        # set sem.value = 0
+        while ret == 0:
+            ret = sem.trywait()
+        # set sem.value = value
+        while value > 0:
+            sem.post()
+            value -= 1
 
     def get_shm(self, shm_name, size, **kwargs):
         if shm_name in self.name2shm:

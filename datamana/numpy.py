@@ -11,6 +11,8 @@ class Server(Base):
         self.oflags = os.O_CREAT | os.O_RDWR
         self.data_id = 0
         self.max_data_id = 2**31 - 1
+        self.sem_init(self.sem, value=0)
+        self.sem_init(self.event, value=0)
 
     def next(self):
         try:
@@ -36,6 +38,7 @@ class Server(Base):
 
     def serve(self):
         self.next()
+        self.sem.post()
 
         while True:
             # wait client signal
@@ -43,10 +46,7 @@ class Server(Base):
 
             if ret == 0:
                 self.sem.wait()
-                loop = ret
-                # clean all signal
-                while loop == 0:
-                    loop = self.event.trywait()
+                self.sem_init(self.event, value=0)
                 self.next()
                 self.sem.post()
             else:
